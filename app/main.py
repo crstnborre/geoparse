@@ -3,7 +3,12 @@ from app.routers import convert, validate, reproject
 
 app = FastAPI(
     title="geoparse",
-    description="REST API for converting, validating and reprojecting geospatial files.",
+    description=(
+        "Open source REST API for processing geospatial files.\n\n"
+        "**Supported vector formats:** GeoJSON, Shapefile (.zip), KML, GeoPackage\n\n"
+        "**Supported raster formats:** GeoTIFF, JPEG2000\n\n"
+        "No authentication required. All endpoints accept `multipart/form-data`."
+    ),
     version="0.1.0",
 )
 

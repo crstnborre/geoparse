@@ -7,7 +7,16 @@ from fastapi.responses import FileResponse
 
 router = APIRouter()
 
-@router.post("/vector")
+@router.post(
+    "/vector",
+    summary="Convert vector file",
+    description=(
+        "Convert a vector geospatial file between formats.\n\n"
+        "**Accepted input formats:** GeoJSON, Shapefile (.zip), KML, GeoPackage\n\n"
+        "**output_format values:** `geojson`, `shapefile`, `kml`, `gpkg`\n\n"
+        "Shapefile output is returned as a `.zip` containing all required component files."
+    ),
+)
 async def vector_conversion(
         file: UploadFile = File(...),
         output_format: str = Form(...),
@@ -43,7 +52,15 @@ async def vector_conversion(
     ext = "zip" if output_format == "shapefile" else output_format
     return FileResponse(output_path, filename=f"converted.{ext}")
 
-@router.post("/raster")
+@router.post(
+    "/raster",
+    summary="Convert raster file",
+    description=(
+        "Convert a raster geospatial file between formats.\n\n"
+        "**Accepted input formats:** GeoTIFF, JPEG2000\n\n"
+        "**output_format values:** `geotiff`, `jpeg2000`"
+    ),
+)
 async def raster_conversion(
     file: UploadFile = File(...),
     output_format: str = Form(...),

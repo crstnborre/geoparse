@@ -6,7 +6,16 @@ from app.services.conversion import validate_file
 
 router = APIRouter()
 
-@router.post("/")
+@router.post(
+    "/",
+    summary="Validate geospatial file",
+    description=(
+        "Check if a file is a valid geospatial file and return its metadata.\n\n"
+        "**Returns for vector:** type, layer count, feature count, CRS (EPSG code)\n\n"
+        "**Returns for raster:** type, band count, width, height, CRS (EPSG code)\n\n"
+        "Returns `{\"valid\": false}` if the file cannot be recognized."
+    ),
+)
 async def validate(file: UploadFile = File(...)):
     suffix = os.path.splitext(file.filename)[1].lower()
 

@@ -7,7 +7,17 @@ from app.services.conversion import reproject
 
 router = APIRouter()
 
-@router.post("/")
+@router.post(
+    "/",
+    summary="Reproject geospatial file",
+    description=(
+        "Reproject a geospatial file to a different coordinate reference system.\n\n"
+        "**Accepted input formats:** GeoJSON, Shapefile (.zip), KML, GeoPackage, GeoTIFF, JPEG2000\n\n"
+        "**target_epsg:** EPSG code of the target CRS (e.g. `4326` for WGS84, `3857` for Web Mercator, "
+        "`9377` for MAGNA-SIRGAS Colombia)\n\n"
+        "Vector files are returned as GeoJSON. Raster files are returned as GeoTIFF."
+    ),
+)
 async def reproject_file(
     file: UploadFile = File(...),
     target_epsg: int = Form(...),
