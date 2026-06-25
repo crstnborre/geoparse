@@ -2,7 +2,7 @@ import os
 import zipfile
 import tempfile
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
-from app.services.conversion import convert_vector, VECTOR_DRIVERS
+from app.services.conversion import convert_vector, convert_raster, VECTOR_DRIVERS, RASTER_DRIVERS, RASTER_EXTENSIONS
 from fastapi.responses import FileResponse
 
 router = APIRouter()
@@ -41,4 +41,29 @@ async def vector_conversion(
         raise HTTPException(status_code=422, detail=str(e))
 
     ext = "zip" if output_format == "shapefile" else output_format
+    return FileResponse(output_path, filename=f"converted.{ext}")
+
+@router.post("/raster")
+async def raster_conversion(
+    file: UploadFile = File(...),
+    output_format: str = Form(...),
+):
+    if output_format not in RASTER_DRIVERS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported format. Choose from: {', '.join(RASTER_DRIVERS.keys())}",
+        )
+
+    suffix = os.path.splitext(file.filename)[1].lower()
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+        tmp.write(await file.read())
+        tmp_path = tmp.name
+
+    try:
+        output_path = convert_raster(tmp_path, output_format)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+
+    ext = RASTER_EXTENSIONS[output_format].lstrip(".")
     return FileResponse(output_path, filename=f"converted.{ext}")
