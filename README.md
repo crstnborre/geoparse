@@ -2,7 +2,18 @@
 
 > 🚧 In development
 
-Open source REST API for converting, validating and reprojecting geospatial files. No authentication required. Supports GeoJSON, Shapefile, KML, GeoPackage, GeoTIFF and JPEG2000.
+Open source REST API for converting, validating and reprojecting geospatial files. No authentication required.
+
+## Supported Formats
+
+| Format | Input | Output |
+|---|---|---|
+| GeoJSON | ✓ | ✓ |
+| Shapefile (.zip) | ✓ | ✓ |
+| KML / KMZ | ✓ | ✓ |
+| GeoPackage (.gpkg) | ✓ | ✓ |
+| GeoTIFF | ✓ | ✓ |
+| JPEG2000 | ✓ | ✓ |
 
 ## Tech Stack
 
@@ -10,9 +21,16 @@ Open source REST API for converting, validating and reprojecting geospatial file
 - GDAL
 - Docker
 
-## Status
+## Local Setup
 
-Active development. Setup instructions coming once the base is ready.
+```bash
+git clone https://github.com/crstnborre/geoparse.git
+cd geoparse
+docker compose up --build
+```
+
+API available at `http://localhost:8000`
+Interactive docs at `http://localhost:8000/docs`
 
 ## License
 

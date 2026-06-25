@@ -41,4 +41,4 @@ async def vector_conversion(
         raise HTTPException(status_code=422, detail=str(e))
 
     ext = "zip" if output_format == "shapefile" else output_format
-    return FileResponse(output_format, filename=f"converted.{ext}")
+    return FileResponse(output_path, filename=f"converted.{ext}")

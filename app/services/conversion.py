@@ -27,7 +27,7 @@ def convert_vector(input_path: str, output_format: str) -> str:
     output_dir = tempfile.mkdtemp()
     output_path = os.path.join(output_dir, "output" + VECTOR_EXTENSIONS[output_format])
 
-    result = driver.CopuDataSource(source, output_path)
+    result = driver.CopyDataSource(source, output_path)
     if result is None:
         raise ValueError("Conversion failed")
 
@@ -38,7 +38,7 @@ def convert_vector(input_path: str, output_format: str) -> str:
         zip_path = os.path.join(output_dir, "output.zip")
         with zipfile.ZipFile(zip_path, "w") as zf:
             for f in os.listdir(output_dir):
-                if f.startswith("output") and not f.endswith(".zip"):
+                if not f.endswith(".zip"):
                     zf.write(os.path.join(output_dir, f), f)
         return zip_path
 
