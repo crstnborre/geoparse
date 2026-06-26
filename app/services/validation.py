@@ -18,7 +18,10 @@ def validate_file(input_path: str) -> dict:
         vector = None
         return info
 
-    raster = gdal.Open(input_path)
+    try:
+        raster = gdal.Open(input_path)
+    except RuntimeError:
+        return {"valid": False}
     if raster is not None:
         crs = osr.SpatialReference()
         crs.ImportFromWkt(raster.GetProjection())
