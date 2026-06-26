@@ -1,10 +1,9 @@
 import os
-import zipfile
 import tempfile
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, BackgroundTasks
 from fastapi.responses import FileResponse
 from app.services.conversion import convert_vector, convert_raster, VECTOR_DRIVERS, RASTER_DRIVERS, RASTER_EXTENSIONS
-from app.services.utils import cleanup
+from app.services.utils import cleanup, extract_zip
 
 router = APIRouter()
 
@@ -35,16 +34,13 @@ async def vector_conversion(
         tmp.write(await file.read())
         tmp_path = tmp.name
 
-    if suffix == ".zip":
-        extract_dir = tempfile.mkdtemp()
-        with zipfile.ZipFile(tmp_path, "r") as zf:
-            zf.extractall(extract_dir)
-        shp_files = [f for f in os.listdir(extract_dir) if f.endswith(".shp")]
-        if not shp_files:
-            raise HTTPException(status_code=400, detail="No .shp file found in zip")
-        input_path = os.path.join(extract_dir, shp_files[0])
+    if suffix in (".zip", ".kmz"):
+        try:
+            input_path = extract_zip(tmp_path)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
     else:
-        input_path=tmp_path
+        input_path = tmp_path
 
     try:
         output_path = convert_vector(input_path, output_format)
