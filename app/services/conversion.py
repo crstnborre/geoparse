@@ -2,6 +2,7 @@ import os
 import zipfile
 import tempfile
 from osgeo import ogr, gdal, osr
+import shutil
 
 VECTOR_DRIVERS = {
     "geojson": "GeoJSON",
@@ -152,3 +153,13 @@ def reproject(input_path: str, target_epsg: int) -> str:
         return output_path
 
     raise ValueError("Could not open input file")
+
+def cleanup(*paths: str) -> None:
+    for path in paths:
+        try:
+            if os.path.isdir(path):
+                shutil.rmtree(path)
+            elif os.path.isfile(path):
+                os.remove(path)
+        except Exception:
+            pass

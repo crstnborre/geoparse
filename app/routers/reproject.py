@@ -1,9 +1,9 @@
 import os
 import zipfile
 import tempfile
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, BackgroundTasks
 from fastapi.responses import FileResponse
-from app.services.conversion import reproject
+from app.services.conversion import reproject, cleanup
 
 router = APIRouter()
 
@@ -19,6 +19,7 @@ router = APIRouter()
     ),
 )
 async def reproject_file(
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     target_epsg: int = Form(...),
 ):
@@ -45,4 +46,5 @@ async def reproject_file(
         raise HTTPException(status_code=422, detail=str(e))
 
     ext = os.path.splitext(output_path)[1].lstrip(".")
+    background_tasks.add_task(cleanup, tmp_path, os.path.dirname(output_path))
     return FileResponse(output_path, filename=f"reprojected.{ext}")

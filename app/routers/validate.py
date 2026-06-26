@@ -1,8 +1,8 @@
 import os
 import zipfile
 import tempfile
-from fastapi import APIRouter, UploadFile, File, HTTPException
-from app.services.conversion import validate_file
+from fastapi import APIRouter, UploadFile, File, HTTPException, BackgroundTasks
+from app.services.conversion import validate_file, cleanup
 
 router = APIRouter()
 
@@ -16,7 +16,7 @@ router = APIRouter()
         "Returns `{\"valid\": false}` if the file cannot be recognized."
     ),
 )
-async def validate(file: UploadFile = File(...)):
+async def validate(background_tasks: BackgroundTasks, file: UploadFile = File(...)):
     suffix = os.path.splitext(file.filename)[1].lower()
 
     with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
@@ -34,4 +34,6 @@ async def validate(file: UploadFile = File(...)):
     else:
         input_path = tmp_path
 
-    return validate_file(input_path)
+    result = validate_file(input_path)
+    background_tasks.add_task(cleanup, tmp_path)
+    return result

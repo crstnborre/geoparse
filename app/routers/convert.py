@@ -1,9 +1,9 @@
 import os
 import zipfile
 import tempfile
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException
-from app.services.conversion import convert_vector, convert_raster, VECTOR_DRIVERS, RASTER_DRIVERS, RASTER_EXTENSIONS
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, BackgroundTasks
 from fastapi.responses import FileResponse
+from app.services.conversion import convert_vector, convert_raster, VECTOR_DRIVERS, RASTER_DRIVERS, RASTER_EXTENSIONS, cleanup
 
 router = APIRouter()
 
@@ -18,6 +18,7 @@ router = APIRouter()
     ),
 )
 async def vector_conversion(
+        background_tasks: BackgroundTasks,
         file: UploadFile = File(...),
         output_format: str = Form(...),
 ):
@@ -50,6 +51,7 @@ async def vector_conversion(
         raise HTTPException(status_code=422, detail=str(e))
 
     ext = "zip" if output_format == "shapefile" else output_format
+    background_tasks.add_task(cleanup, tmp_path, os.path.dirname(output_path))
     return FileResponse(output_path, filename=f"converted.{ext}")
 
 @router.post(
@@ -62,6 +64,7 @@ async def vector_conversion(
     ),
 )
 async def raster_conversion(
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     output_format: str = Form(...),
 ):
@@ -83,4 +86,5 @@ async def raster_conversion(
         raise HTTPException(status_code=422, detail=str(e))
 
     ext = RASTER_EXTENSIONS[output_format].lstrip(".")
+    background_tasks.add_task(cleanup, tmp_path, os.path.dirname(output_path))
     return FileResponse(output_path, filename=f"converted.{ext}")
