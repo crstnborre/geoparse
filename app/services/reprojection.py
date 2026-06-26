@@ -2,6 +2,9 @@ import os
 import tempfile
 from osgeo import ogr, gdal, osr
 
+gdal.UseExceptions()
+ogr.UseExceptions()
+
 def reproject(input_path: str, target_epsg: int) -> str:
     target_srs = osr.SpatialReference()
     target_srs.ImportFromEPSG(target_epsg)

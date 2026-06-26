@@ -3,6 +3,9 @@ import zipfile
 import tempfile
 from osgeo import ogr, gdal
 
+gdal.UseExceptions()
+ogr.UseExceptions()
+
 VECTOR_DRIVERS = {
     "geojson": "GeoJSON",
     "shapefile": "ESRI Shapefile",

@@ -1,5 +1,8 @@
 from osgeo import ogr, gdal, osr
 
+gdal.UseExceptions()
+ogr.UseExceptions()
+
 def validate_file(input_path: str) -> dict:
     vector = ogr.Open(input_path)
     if vector is not None:
