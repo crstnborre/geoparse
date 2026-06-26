@@ -216,3 +216,10 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# dev test files
+*.tif
+*.tif.aux.xml
+*.geojson
+*.jp2
+*.zip

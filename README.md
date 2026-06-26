@@ -30,6 +30,20 @@ docker compose up --build
 API available at `http://localhost:8000`
 Interactive docs at `http://localhost:8000/docs`
 
+## Running Tests
+
+```bash
+docker compose exec api pytest tests/ -v
+```
+
+## Configuration
+
+Copy `.env.example` to `.env` and adjust as needed:
+
+| Variable | Default | Description |
+|---|---|---|
+| `MAX_FILE_SIZE_MB` | `100` | Maximum upload size in MB |
+
 ## Endpoints
 
 ### Convert vector file
