@@ -2,7 +2,8 @@ import os
 import zipfile
 import tempfile
 from fastapi import APIRouter, UploadFile, File, HTTPException, BackgroundTasks
-from app.services.conversion import validate_file, cleanup
+from app.services.validation import validate_file
+from app.services.utils import cleanup
 
 router = APIRouter()
 

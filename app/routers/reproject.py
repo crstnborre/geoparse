@@ -3,7 +3,8 @@ import zipfile
 import tempfile
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, BackgroundTasks
 from fastapi.responses import FileResponse
-from app.services.conversion import reproject, cleanup
+from app.services.reprojection import reproject
+from app.services.utils import cleanup
 
 router = APIRouter()
 

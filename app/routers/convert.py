@@ -3,7 +3,8 @@ import zipfile
 import tempfile
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, BackgroundTasks
 from fastapi.responses import FileResponse
-from app.services.conversion import convert_vector, convert_raster, VECTOR_DRIVERS, RASTER_DRIVERS, RASTER_EXTENSIONS, cleanup
+from app.services.conversion import convert_vector, convert_raster, VECTOR_DRIVERS, RASTER_DRIVERS, RASTER_EXTENSIONS
+from app.services.utils import cleanup
 
 router = APIRouter()
 

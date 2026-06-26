@@ -1,8 +1,7 @@
 import os
 import zipfile
 import tempfile
-from osgeo import ogr, gdal, osr
-import shutil
+from osgeo import ogr, gdal
 
 VECTOR_DRIVERS = {
     "geojson": "GeoJSON",
@@ -73,93 +72,3 @@ def convert_raster(input_path: str, output_format: str) -> str:
     source = None
 
     return output_path
-
-def validate_file(input_path: str) -> dict:
-    # intenta abrir como vector
-    vector = ogr.Open(input_path)
-    if vector is not None:
-        layer = vector.GetLayer(0)
-        crs = layer.GetSpatialRef()
-        info = {
-            "valid": True,
-            "type": "vector",
-            "layers": vector.GetLayerCount(),
-            "features": layer.GetFeatureCount(),
-            "crs": crs.GetAuthorityCode(None) if crs else None,
-        }
-        vector = None
-        return info
-
-    # intenta abrir como raster
-    raster = gdal.Open(input_path)
-    if raster is not None:
-        crs = osr.SpatialReference()
-        crs.ImportFromWkt(raster.GetProjection())
-        info = {
-            "valid": True,
-            "type": "raster",
-            "bands": raster.RasterCount,
-            "width": raster.RasterXSize,
-            "height": raster.RasterYSize,
-            "crs": crs.GetAuthorityCode(None) if raster.GetProjection() else None,
-        }
-        raster = None
-        return info
-
-    return {"valid": False}
-
-def reproject(input_path: str, target_epsg: int) -> str:
-    target_srs = osr.SpatialReference()
-    target_srs.ImportFromEPSG(target_epsg)
-
-    # intenta como vector
-    source = ogr.Open(input_path)
-    if source is not None:
-        output_dir = tempfile.mkdtemp()
-        output_path = os.path.join(output_dir, "reprojected.geojson")
-        driver = ogr.GetDriverByName("GeoJSON")
-        out_ds = driver.CreateDataSource(output_path)
-
-        for i in range(source.GetLayerCount()):
-            in_layer = source.GetLayer(i)
-            source_srs = in_layer.GetSpatialRef()
-            transform = osr.CoordinateTransformation(source_srs, target_srs)
-            out_layer = out_ds.CreateLayer(in_layer.GetName(), target_srs)
-
-            in_defn = in_layer.GetLayerDefn()
-            for j in range(in_defn.GetFieldCount()):
-                out_layer.CreateField(in_defn.GetFieldDefn(j))
-
-            for feature in in_layer:
-                geom = feature.GetGeometryRef()
-                if geom is None:
-                    continue
-                geom = geom.Clone()
-                geom.Transform(transform)
-                feature.SetGeometry(geom)
-                out_layer.CreateFeature(feature)
-
-        out_ds = None
-        source = None
-        return output_path
-
-    # intenta como raster
-    raster = gdal.Open(input_path)
-    if raster is not None:
-        output_dir = tempfile.mkdtemp()
-        output_path = os.path.join(output_dir, "reprojected.tif")
-        gdal.Warp(output_path, raster, dstSRS=f"EPSG:{target_epsg}")
-        raster = None
-        return output_path
-
-    raise ValueError("Could not open input file")
-
-def cleanup(*paths: str) -> None:
-    for path in paths:
-        try:
-            if os.path.isdir(path):
-                shutil.rmtree(path)
-            elif os.path.isfile(path):
-                os.remove(path)
-        except Exception:
-            pass
